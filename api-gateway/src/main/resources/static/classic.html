@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Adaptive Travel Planner</title>
+<style>
+:root{--bg:#eef3f4;--card:#fff;--ink:#12303a;--mute:#5d7580;--line:#d3dfe2;--brand:#0b5563;--brand-ink:#fff;--accent:#e0912f;--ok:#1d7a4d;--bad:#b3392f;--soft:#e2eef0}
+@media(prefers-color-scheme:dark){:root{--bg:#0e1a1f;--card:#16262d;--ink:#e3eef0;--mute:#8fa8b1;--line:#27404a;--brand:#4fb3c4;--brand-ink:#08222a;--accent:#f0a94d;--ok:#52c58a;--bad:#ef7d72;--soft:#1d333b}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "Segoe UI",system-ui,sans-serif}
+header{padding:22px 28px 6px;display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+h1{margin:0;font-size:26px;letter-spacing:-.4px}
+header p{margin:0;color:var(--mute)}
+main{display:grid;grid-template-columns:minmax(320px,430px) 1fr;gap:20px;padding:16px 28px 40px;align-items:start}
+@media(max-width:900px){main{grid-template-columns:1fr;padding:12px 14px 30px}header{padding:18px 14px 4px}}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.tabs{display:flex;border-bottom:1px solid var(--line)}
+.tabs button{flex:1;padding:12px 6px;border:0;background:none;color:var(--mute);font:inherit;font-weight:600;cursor:pointer;border-bottom:3px solid transparent}
+.tabs button[aria-selected=true]{color:var(--brand);border-bottom-color:var(--brand)}
+.pane{padding:16px;display:none}.pane.on{display:block}
+h2{font-size:16px;margin:0 0 10px}
+form{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+label{display:flex;flex-direction:column;font-size:12.5px;color:var(--mute);gap:3px}
+label.full,.full{grid-column:1/-1}
+input,select{font:inherit;padding:8px 9px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);width:100%}
+input[type=checkbox]{width:auto}
+label.check{flex-direction:row;align-items:center;gap:8px;color:var(--ink)}
+button.btn{font:inherit;font-weight:600;padding:9px 14px;border:0;border-radius:6px;background:var(--brand);color:var(--brand-ink);cursor:pointer}
+button.btn.alt{background:var(--soft);color:var(--ink)}
+button.btn.sm{padding:5px 9px;font-size:13px}
+button.btn.del{background:none;color:var(--bad);padding:5px 6px}
+:focus-visible{outline:3px solid var(--accent);outline-offset:1px}
+.item{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}
+.item b{display:block}.item small{color:var(--mute)}
+.acts{display:flex;gap:4px;flex-shrink:0}
+.empty{color:var(--mute);padding:8px 0}
+.row{display:flex;gap:8px;margin-bottom:10px}
+#toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:8px;max-width:90vw;display:none;z-index:9}
+#toast.err{background:var(--bad);color:#fff}
+.hero{padding:22px;background:var(--brand);color:var(--brand-ink)}
+.hero h2{font-size:24px;margin:0}
+.hero p{margin:4px 0 0;opacity:.85}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));border-bottom:1px solid var(--line)}
+.stats div{padding:14px 18px;border-right:1px solid var(--line)}
+.stats small{display:block;color:var(--mute)}
+.stats strong{font-size:19px}
+.over{color:var(--bad)}.under{color:var(--ok)}
+.stay{padding:14px 22px;border-bottom:1px solid var(--line);background:var(--soft)}
+.timeline{padding:8px 22px 6px;margin:0;list-style:none}
+.timeline li{position:relative;padding:12px 0 12px 26px;border-left:2px solid var(--line);margin-left:6px}
+.timeline li::before{content:"";position:absolute;left:-7px;top:17px;width:12px;height:12px;border-radius:50%;background:var(--accent)}
+.timeline h3{margin:0 0 3px;font-size:15px}
+.timeline p{margin:1px 0;color:var(--mute)}.timeline p span{color:var(--ink)}
+.notes{margin:0;padding:12px 22px 18px 40px;color:var(--mute);border-top:1px solid var(--line)}
+.replan{padding:14px 22px;border-bottom:1px solid var(--line);background:var(--soft)}.replan ul{margin:6px 0 0;padding-left:18px}
+.placeholder{padding:46px 24px;text-align:center;color:var(--mute)}
+</style>
+</head>
+<body>
+<header><h1>Adaptive Travel Planner</h1><p>Create a trip, add places, set preferences, then build the plan.</p></header>
+<main>
+<section class="panel">
+  <div class="tabs" role="tablist">
+    <button role="tab" aria-selected="true" data-tab="trips">Trips</button>
+    <button role="tab" aria-selected="false" data-tab="places">Places</button>
+    <button role="tab" aria-selected="false" data-tab="prefs">Preferences</button>
+    <button role="tab" aria-selected="false" data-tab="fb">Feedback</button>
+  </div>
+
+  <div class="pane on" id="trips">
+    <h2>New trip</h2>
+    <form id="tripForm">
+      <label class="full">Destination<input name="destination" required placeholder="Goa"></label>
+      <label>Start date<input type="date" name="startDate" required></label>
+      <label>End date<input type="date" name="endDate" required></label>
+      <label>Budget (₹)<input type="number" name="budget" min="1" required></label>
+      <label>Travelers<input type="number" name="travelers" min="1" value="1"></label>
+      <label class="check full"><input type="checkbox" name="soloTraveler"> I am travelling solo</label>
+      <button class="btn full" type="submit">Save trip</button>
+    </form>
+    <h2>Your trips</h2>
+    <div id="tripList"></div>
+  </div>
+
+  <div class="pane" id="places">
+    <h2>Add a hotel or restaurant</h2>
+    <form id="placeForm">
+      <label class="full">Name<input name="name" required></label>
+      <label>Destination<input name="destination" required placeholder="Goa"></label>
+      <label>Type<select name="type"><option>HOTEL</option><option>RESTAURANT</option></select></label>
+      <label>Price (₹)<input type="number" name="price" min="1" required></label>
+      <label>Rating (0-5)<input type="number" name="rating" min="0" max="5" step="0.1" required></label>
+      <label class="full">Category<input name="category" placeholder="seafood, budget, cafe..."></label>
+      <button class="btn full" type="submit">Save place</button>
+    </form>
+    <div class="row">
+      <input id="fDest" placeholder="Filter by destination">
+      <select id="fType"><option value="">All</option><option>HOTEL</option><option>RESTAURANT</option></select>
+    </div>
+    <div id="placeList"></div>
+  </div>
+
+  <div class="pane" id="fb">
+    <h2>Rate a place from this trip</h2>
+    <form id="fbForm">
+      <label class="full">Trip<select id="fbTrip" name="tripId" required></select></label>
+      <label class="full">Place<select id="fbPlace" name="placeId" required></select></label>
+      <label>Rating<select name="rating"><option value="5">5 - loved it</option><option value="4">4</option><option value="3">3</option><option value="2">2</option><option value="1">1 - avoid</option></select></label>
+      <label>Comment<input name="comment" placeholder="Optional"></label>
+      <button class="btn full" type="submit">Save feedback</button>
+    </form>
+    <p class="empty">Places rated 2 or lower on average are left out when you choose Replan on a trip.</p>
+  </div>
+
+  <div class="pane" id="prefs">
+    <h2>Meal preferences for a trip</h2>
+    <form id="prefForm">
+      <label class="full">Trip<select id="prefTrip" name="tripId" required></select></label>
+      <label class="full">Prefer these categories<input name="preferredCategories" placeholder="Indian, cafe"></label>
+      <label class="full">Avoid these categories<input name="avoidCategories" placeholder="seafood"></label>
+      <label>Max price per meal (₹, 0 = any)<input type="number" name="maxMealPrice" min="0" value="0"></label>
+      <label>Minimum rating<input type="number" name="minRating" min="0" max="5" step="0.1" value="0"></label>
+      <button class="btn" type="submit">Save preferences</button>
+      <button class="btn alt" type="button" id="prefClear">Clear</button>
+    </form>
+  </div>
+</section>
+
+<section class="panel" id="result" aria-live="polite">
+  <div class="placeholder">Choose <b>Plan</b> on one of your trips to see the day-by-day itinerary here.</div>
+</section>
+</main>
+<div id="toast" role="status"></div>
+
+<script>
+// Served by the gateway, so calls go to the same address. Opened as a plain file, fall back to the gateway port.
+const BASE = location.protocol === 'file:' ? 'http://localhost:8080' : '';
+const $ = s => document.querySelector(s);
+const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const money = n => '₹' + Math.round(n).toLocaleString('en-IN');
+let trips = [];
+
+function toast(msg, err) {
+  const t = $('#toast'); t.textContent = msg; t.className = err ? 'err' : ''; t.style.display = 'block';
+  clearTimeout(toast.id); toast.id = setTimeout(() => t.style.display = 'none', 3500);
+}
+
+async function api(path, opts = {}) {
+  let res;
+  try {
+    res = await fetch(BASE + path, { headers: { 'Content-Type': 'application/json' }, ...opts });
+  } catch (e) { throw new Error('Cannot reach the gateway on port 8080. Is it running?'); }
+  if (res.status === 204) return null;
+  const body = await res.json().catch(() => null);
+  if (!res.ok) throw new Error(body ? Object.values(body).join(', ') : 'Request failed (' + res.status + ')');
+  return body;
+}
+const run = fn => async (...a) => { try { await fn(...a); } catch (e) { toast(e.message, true); } };
+
+document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => {
+  if (b.dataset.tab === 'fb') refreshFb();
+  document.querySelectorAll('.tabs button').forEach(x => x.setAttribute('aria-selected', x === b));
+  document.querySelectorAll('.pane').forEach(p => p.classList.toggle('on', p.id === b.dataset.tab));
+});
+const openTab = name => document.querySelector(`[data-tab=${name}]`).click();
+
+// ---------- Trips ----------
+const loadTrips = run(async () => {
+  trips = await api('/api/trips');
+  $('#tripList').innerHTML = trips.length ? trips.map(t => `
+    <div class="item"><div><b>${esc(t.destination)}</b><small>${esc(t.startDate)} to ${esc(t.endDate)} · ${money(t.budget)} · ${t.travelers} traveler(s)${t.soloTraveler ? ' · solo' : ''}</small></div>
+    <div class="acts"><button class="btn sm" data-plan="${t.id}">Plan</button><button class="btn sm alt" data-replan="${t.id}">Replan</button><button class="btn sm alt" data-pref="${t.id}">Prefs</button><button class="btn sm del" data-del="${t.id}" aria-label="Delete trip">Delete</button></div></div>`).join('')
+    : '<p class="empty">No trips yet. Save your first trip above.</p>';
+  $('#fbTrip').innerHTML = $('#prefTrip').innerHTML = trips.map(t => `<option value="${t.id}">#${t.id} ${esc(t.destination)}</option>`).join('');
+});
+$('#tripList').onclick = run(async e => {
+  const b = e.target.closest('button'); if (!b) return;
+  if (b.dataset.plan) return plan(b.dataset.plan);
+  if (b.dataset.replan) return replan(b.dataset.replan);
+  if (b.dataset.pref) { $('#prefTrip').value = b.dataset.pref; openTab('prefs'); return loadPref(); }
+  if (b.dataset.del && confirm('Delete this trip?')) { await api('/api/trips/' + b.dataset.del, { method: 'DELETE' }); toast('Trip deleted'); loadTrips(); }
+});
+$('#tripForm').onsubmit = run(async e => {
+  e.preventDefault(); const f = new FormData(e.target);
+  await api('/api/trips', { method: 'POST', body: JSON.stringify({
+    destination: f.get('destination'), startDate: f.get('startDate'), endDate: f.get('endDate'),
+    budget: +f.get('budget'), travelers: +f.get('travelers') || 1, soloTraveler: f.has('soloTraveler') }) });
+  e.target.reset(); toast('Trip saved'); loadTrips();
+});
+
+// ---------- Places ----------
+const loadPlaces = run(async () => {
+  const q = new URLSearchParams();
+  if ($('#fDest').value.trim()) q.set('destination', $('#fDest').value.trim());
+  if ($('#fType').value) q.set('type', $('#fType').value);
+  const places = await api('/api/places' + (q.toString() ? '?' + q : ''));
+  $('#placeList').innerHTML = places.length ? places.map(p => `
+    <div class="item"><div><b>${esc(p.name)}</b><small>${esc(p.type.toLowerCase())} in ${esc(p.destination)} · ${money(p.price)} · rated ${p.rating}${p.category ? ' · ' + esc(p.category) : ''}</small></div>
+    <div class="acts"><button class="btn sm del" data-del="${p.id}" aria-label="Delete place">Delete</button></div></div>`).join('')
+    : '<p class="empty">No places match. Add hotels and restaurants for your destination.</p>';
+});
+$('#placeList').onclick = run(async e => {
+  const b = e.target.closest('[data-del]');
+  if (b && confirm('Delete this place?')) { await api('/api/places/' + b.dataset.del, { method: 'DELETE' }); toast('Place deleted'); loadPlaces(); }
+});
+$('#placeForm').onsubmit = run(async e => {
+  e.preventDefault(); const f = Object.fromEntries(new FormData(e.target));
+  f.price = +f.price; f.rating = +f.rating;
+  await api('/api/places', { method: 'POST', body: JSON.stringify(f) });
+  e.target.reset(); toast('Place saved'); loadPlaces();
+});
+$('#fDest').oninput = loadPlaces; $('#fType').onchange = loadPlaces;
+
+// ---------- Preferences ----------
+const prefFields = ['preferredCategories', 'avoidCategories', 'maxMealPrice', 'minRating'];
+const loadPref = run(async () => {
+  const id = $('#prefTrip').value; if (!id) return;
+  const f = $('#prefForm');
+  try {
+    const p = await api('/api/preferences/trip/' + id);
+    prefFields.forEach(k => f[k].value = p[k] ?? '');
+  } catch (e) { prefFields.forEach(k => f[k].value = k.startsWith('m') ? 0 : ''); }
+});
+$('#prefTrip').onchange = loadPref;
+$('#prefForm').onsubmit = run(async e => {
+  e.preventDefault(); const f = e.target;
+  await api('/api/preferences/trip/' + f.tripId.value, { method: 'PUT', body: JSON.stringify({
+    preferredCategories: f.preferredCategories.value, avoidCategories: f.avoidCategories.value,
+    maxMealPrice: +f.maxMealPrice.value || 0, minRating: +f.minRating.value || 0 }) });
+  toast('Preferences saved. Choose Plan to see the effect.');
+});
+$('#prefClear').onclick = run(async () => {
+  const id = $('#prefTrip').value; if (!id) return;
+  try { await api('/api/preferences/trip/' + id, { method: 'DELETE' }); } catch (e) {}
+  loadPref(); toast('Preferences cleared');
+});
+
+// ---------- Itinerary ----------
+async function plan(id, extra) {
+  const p = extra ? extra.newPlan : await api('/api/plans/' + id);
+  const pr = p.appliedPreferences;
+  $('#result').innerHTML = `
+    <div class="hero"><h2>${esc(p.destination)}</h2><p>${esc(p.startDate)} to ${esc(p.endDate)} · ${p.nights} night(s) · ${p.travelers} traveler(s)</p></div>
+    ${extra ? replanBox(extra) : ''}
+    <div class="stats">
+      <div><small>Stay</small><strong>${money(p.hotelCost)}</strong></div>
+      <div><small>Meals</small><strong>${money(p.mealsCost)}</strong></div>
+      <div><small>Estimated total</small><strong class="${p.withinBudget ? 'under' : 'over'}">${money(p.totalEstimatedCost)}</strong></div>
+      <div><small>Your budget</small><strong>${money(p.budget)}</strong></div>
+    </div>
+    <div class="stay">${p.hotel ? `<b>${esc(p.hotel.name)}</b> · ${money(p.hotel.price)} per night · rated ${p.hotel.rating}` : 'No hotel chosen'}${pr ? `<br><small>Preferences applied: ${[pr.preferredCategories && 'prefer ' + esc(pr.preferredCategories), pr.avoidCategories && 'avoid ' + esc(pr.avoidCategories), pr.maxMealPrice > 0 && 'max ' + money(pr.maxMealPrice) + ' per meal', pr.minRating > 0 && 'rating ' + pr.minRating + '+'].filter(Boolean).join(', ') || 'none set'}</small>` : ''}</div>
+    <ol class="timeline">${p.days.map(d => `<li><h3>Day ${d.dayNumber} · ${esc(d.date)}</h3>
+      <p>Stay: <span>${esc(d.stay || (p.hotel ? 'check-out day' : 'no hotel chosen'))}</span></p>
+      <p>Lunch: <span>${esc(d.lunch || 'not planned')}</span></p>
+      <p>Dinner: <span>${esc(d.dinner || 'not planned')}</span></p></li>`).join('')}</ol>
+    ${p.notes.length ? `<ul class="notes">${p.notes.map(n => `<li>${esc(n)}</li>`).join('')}</ul>` : ''}`;
+  $('#result').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ---------- Feedback and replanning ----------
+const refreshFb = run(async () => {
+  const places = await api('/api/places');
+  $('#fbPlace').innerHTML = places.map(p => `<option value="${p.id}" data-name="${esc(p.name)}">${esc(p.name)} (${esc(p.type.toLowerCase())}, ${esc(p.destination)})</option>`).join('');
+});
+$('#fbForm').onsubmit = run(async e => {
+  e.preventDefault(); const f = e.target; const o = f.placeId.selectedOptions[0];
+  if (!o) throw new Error('Add a place first.');
+  await api('/api/feedback', { method: 'POST', body: JSON.stringify({ tripId: +f.tripId.value, placeId: +f.placeId.value, placeName: o.dataset.name, rating: +f.rating.value, comment: f.comment.value }) });
+  f.comment.value = ''; toast('Feedback saved. Choose Replan on the trip to use it.');
+});
+const replan = run(async id => { await plan(id, await api('/api/replan/' + id, { method: 'POST' })); });
+function replanBox(r) {
+  return `<div class="replan"><b>${esc(r.summary)}</b>${r.avoidedPlaces.length ? `<br><small>Avoided: ${r.avoidedPlaces.map(esc).join(', ')}</small>` : ''}${r.changes.length ? `<ul>${r.changes.map(c => `<li>${esc(c)}</li>`).join('')}</ul>` : ''}</div>`;
+}
+
+loadTrips(); loadPlaces();
+</script>
+</body>
+</html>

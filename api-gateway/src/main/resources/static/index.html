@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Travel Planner</title>
+<style>
+:root{--bg:#f2f6f7;--card:#fff;--ink:#14323c;--mute:#5d7580;--line:#d9e4e7;--brand:#0b5563;--bi:#fff;--acc:#e0912f;--soft:#e6f0f2;--g:#d6f0e0;--gi:#14583a;--y:#fbe9c8;--yi:#7a4c06;--r:#f7d4d0;--ri:#8a2a21}
+@media(prefers-color-scheme:dark){:root{--bg:#0e1a1f;--card:#16262d;--ink:#e3eef0;--mute:#8fa8b1;--line:#27404a;--brand:#4fb3c4;--bi:#08222a;--acc:#f0a94d;--soft:#1d333b;--g:#1c4a35;--gi:#bdeacf;--y:#5a4313;--yi:#f6dca5;--r:#5e2a25;--ri:#f6c5c0}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "Segoe UI",system-ui,sans-serif}
+.wrap{max-width:900px;margin:0 auto;padding:20px 16px 50px}
+header{text-align:center;padding:36px 20px;margin-bottom:18px;border-radius:20px;color:#fff;background:linear-gradient(125deg,#0b5563,#12828f 55%,#e0912f);box-shadow:0 10px 30px rgba(11,85,99,.3)}header h1{margin:0;font-size:36px;letter-spacing:-.5px}header p{margin:8px auto 0;max-width:560px;opacity:.95}
+.steps{display:flex;gap:6px;margin-bottom:16px}.steps div{flex:1;text-align:center;padding:8px 4px;border-radius:8px;background:var(--soft);color:var(--mute);font-size:14px;font-weight:600}
+.steps .on{background:var(--brand);color:var(--bi)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px;margin-bottom:16px}
+h2{margin:0 0 4px;font-size:21px}h3{margin:0 0 6px;font-size:17px}.help{color:var(--mute);margin:0 0 14px}
+label{display:block;font-weight:600;margin:12px 0 4px}label small{font-weight:400;color:var(--mute)}
+input[type=text],input[type=date],input[type=number]{width:100%;font:inherit;padding:11px 12px;border:1px solid var(--line);border-radius:9px;background:var(--bg);color:var(--ink)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}@media(max-width:560px){.two{grid-template-columns:1fr}}
+.pick{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px}
+.pick label{display:flex;align-items:center;gap:8px;margin:0;padding:10px 14px;border:1px solid var(--line);border-radius:10px;font-weight:500;cursor:pointer;background:var(--bg)}
+.pick input{width:18px;height:18px}
+.nav{display:flex;justify-content:space-between;gap:10px;margin-top:20px}
+.btn{font:inherit;font-weight:700;padding:12px 22px;border:0;border-radius:10px;background:var(--brand);color:var(--bi);cursor:pointer;text-decoration:none;display:inline-block}
+.btn.alt{background:var(--soft);color:var(--ink)}
+:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+.banner{background:var(--brand);color:var(--bi);border-radius:14px;padding:22px;margin-bottom:16px}.banner h2{font-size:26px}.banner p{margin:4px 0 0;opacity:.9}
+.pill{display:inline-block;padding:3px 11px;border-radius:14px;font-size:14px;margin:2px 4px 2px 0;background:var(--soft)}
+.pill.good{background:var(--g);color:var(--gi)}.pill.mid{background:var(--y);color:var(--yi)}.pill.bad{background:var(--r);color:var(--ri)}
+.facts{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+.list{margin:6px 0 0;padding-left:20px}.mute{color:var(--mute)}
+.day{padding:0;overflow:hidden}.dh{background:var(--soft);padding:14px 20px}.dh h3{margin:0}
+.stop{padding:14px 20px;border-top:1px solid var(--line);display:grid;grid-template-columns:62px 1fr;gap:10px}
+.time{font-weight:700;color:var(--brand)}.stop b{font-size:17px}
+.why{color:var(--mute);margin-top:4px}
+details{margin-top:10px}summary{cursor:pointer;font-weight:600;color:var(--brand)}
+.hotel{padding:10px 0;border-top:1px solid var(--line)}
+.err{background:var(--r);color:var(--ri);padding:14px;border-radius:10px;margin-bottom:14px}
+.load{text-align:center;padding:50px 10px;color:var(--mute)}
+.rv{margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}.rv input{width:auto;flex:1;min-width:150px;padding:7px 9px}.rv select{padding:7px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:inherit}
+.sm2{padding:7px 12px;font-size:14px}.rvout{margin-top:6px}
+.tabbar{display:flex;gap:8px;overflow-x:auto;position:sticky;top:0;z-index:5;background:var(--bg);padding:10px 0;margin-bottom:10px}
+.tabbar button,.dchips button{font:inherit;font-weight:600;white-space:nowrap;padding:9px 16px;border-radius:22px;border:1px solid var(--line);background:var(--card);color:var(--mute);cursor:pointer}
+.tabbar button.on,.dchips button.on{background:var(--brand);color:var(--bi);border-color:var(--brand)}
+.dchips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}.dchips button{padding:6px 14px;font-size:14px}
+.bchip{display:inline-block;background:rgba(255,255,255,.18);padding:4px 12px;border-radius:14px;font-size:14px;margin:10px 6px 0 0}
+.banner{background:linear-gradient(120deg,var(--brand),#12828f);box-shadow:0 6px 20px rgba(11,85,99,.25)}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}.fade{animation:fade .25s}
+.card{box-shadow:0 2px 12px rgba(0,0,0,.06);border-radius:18px}
+.pick label{transition:all .15s;padding:12px 16px}.pick label:hover{border-color:var(--brand);transform:translateY(-1px)}
+.pick label:has(input:checked){border-color:var(--brand);background:var(--soft);box-shadow:inset 0 0 0 2px var(--brand);font-weight:700}
+input[type=text]:focus,input[type=date]:focus,input[type=number]:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 3px rgba(18,130,143,.25)}
+.steps div{border-radius:20px;padding:10px 4px}
+.btn{box-shadow:0 3px 10px rgba(11,85,99,.25);transition:transform .1s}.btn:hover{transform:translateY(-1px)}
+.hide{display:none}
+</style></head><body><div class="wrap">
+<header><h1>✈️ Travel Planner</h1><p>Answer a few questions. We plan your trip using real weather, traffic and crowd information.</p></header>
+
+<div id="form">
+ <div class="steps"><div id="s1" class="on">1. Your trip</div><div id="s2">2. Your stay</div></div>
+
+ <div class="card" id="p1">
+  <h2>📍 Where are you going?</h2><p class="help">We use this to plan your route, days and weather.</p>
+  <label>Where are you leaving from? <small>(optional, for bus and route info)</small><input type="text" id="from" placeholder="For example: Hyderabad"></label>
+  <label>Where do you want to go?<input type="text" id="to" placeholder="For example: Goa" required></label>
+  <div class="two"><label>First day<input type="date" id="start" required></label><label>Last day<input type="date" id="end" required></label></div>
+  <div class="nav"><span></span><button class="btn" id="next">Next: your stay</button></div>
+ </div>
+
+ <div class="card hide" id="p2">
+  <h2>🏨 Your stay, style and food</h2><p class="help">We rank hotels by how well they match this.</p>
+  <label>Most you want to pay per night <small>(in rupees, leave empty for no limit)</small><input type="number" id="max" min="500" placeholder="For example: 4000"></label>
+  <label>What should the hotel have? <small>(tick any)</small></label>
+  <div class="pick"><label><input type="checkbox" name="am" value="pool"> 🏊 Swimming pool</label><label><input type="checkbox" name="am" value="wifi"> 📶 Wifi</label><label><input type="checkbox" name="am" value="breakfast"> 🍳 Breakfast</label></div>
+  <label>How do you want this trip to feel?</label>
+  <div class="pick"><label><input type="radio" name="pace" value="rest"> 🌴 Rest and relax <small>(1 easy stop a day)</small></label><label><input type="radio" name="pace" value="light"> 🚶 Light activities <small>(2 stops a day)</small></label><label><input type="radio" name="pace" value="explore" checked> 🧭 Explore a lot <small>(3 stops a day)</small></label></div>
+  <label>What do you enjoy? <small>(tick any)</small></label>
+  <div class="pick"><label><input type="checkbox" name="int" value="outdoor"> 🌳 Outdoors and nature</label><label><input type="checkbox" name="int" value="indoor"> 🏛️ Indoor places</label><label><input type="checkbox" name="int" value="shopping"> 🛍️ Shopping</label><label><input type="checkbox" name="int" value="culture"> 🎭 Culture and history</label></div>
+  <label>What do you eat?</label>
+  <div class="pick"><label><input type="radio" name="diet" value="any" checked> 🍽️ Anything</label><label><input type="radio" name="diet" value="veg"> 🥗 Vegetarian</label></div>
+  <label>Favourite food <small>(tick any)</small></label>
+  <div class="pick"><label><input type="checkbox" name="cui" value="indian"> 🍛 Indian</label><label><input type="checkbox" name="cui" value="chinese"> 🥡 Chinese</label><label><input type="checkbox" name="cui" value="italian"> 🍝 Italian</label><label><input type="checkbox" name="cui" value="seafood"> 🦐 Seafood</label><label><input type="checkbox" name="cui" value="cafe"> ☕ Cafes</label></div>
+  <label>Most you want to spend per meal <small>(in rupees, optional)</small><input type="number" id="meal" min="100" placeholder="For example: 600"></label>
+  <label>Where should the hotel be?</label>
+  <div class="pick"><label><input type="checkbox" id="near" checked> 📍 Close to the places I will visit</label></div>
+  <div class="nav"><button class="btn alt" id="back">Back</button><button class="btn" id="go">Plan my trip</button></div>
+ </div>
+</div>
+
+<div id="out"></div>
+</div>
+<script>
+const BASE=location.protocol==='file:'?'http://localhost:8080':'';
+const $=s=>document.querySelector(s);
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const money=n=>'₹'+Math.round(n).toLocaleString('en-IN');
+const iso=d=>d.toISOString().slice(0,10);
+const a=new Date();a.setDate(a.getDate()+3);const z=new Date(a);z.setDate(z.getDate()+3);
+$('#start').value=iso(a);$('#end').value=iso(z);
+
+function step(n){$('#p1').classList.toggle('hide',n!==1);$('#p2').classList.toggle('hide',n!==2);
+ $('#s1').className=n===1?'on':'';$('#s2').className=n===2?'on':'';$('#form').classList.remove('hide');window.scrollTo(0,0)}
+$('#next').onclick=()=>{
+ if(!$('#to').value.trim()||!$('#start').value||!$('#end').value){$('#to').reportValidity();return}
+ if($('#end').value<$('#start').value){alert('The last day must be on or after the first day.');return}
+ step(2)};
+$('#back').onclick=()=>step(1);
+
+$('#go').onclick=async()=>{
+ const to=$('#to').value.trim(),from=$('#from').value.trim(),start=$('#start').value,end=$('#end').value;
+ $('#form').classList.add('hide');window.curTab='trip';
+ $('#out').innerHTML='<div class="card load">Planning your trip...<br>Checking weather, roads and crowds. This takes a few seconds.</div>';
+ const body={destination:to,startDate:start,endDate:end,maxHotelPerNight:$('#max').value?+$('#max').value:null,
+  amenities:[...document.querySelectorAll('[name=am]:checked')].map(x=>x.value),nearAttractions:$('#near').checked,pace:document.querySelector('[name=pace]:checked').value,interests:[...document.querySelectorAll('[name=int]:checked')].map(x=>x.value)};
+ const post=(p,b)=>fetch(BASE+p,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)});
+ const jp=from?post('/api/smart-plan/journey',{from,to,date:start}).then(r=>r.ok?r.json():null).catch(()=>null):Promise.resolve(null);
+ try{
+  const fp=post('/api/smart-plan/food',{destination:to,startDate:start,endDate:end,diet:document.querySelector('[name=diet]:checked').value,cuisines:[...document.querySelectorAll('[name=cui]:checked')].map(x=>x.value),maxPerMeal:$('#meal').value?+$('#meal').value:null}).then(r=>r.ok?r.json():null).catch(()=>null);
+  const r=await post('/api/smart-plan',body);const d=await r.json().catch(()=>null);
+  if(!r.ok)throw new Error(d?Object.values(d).join(', '):'Something went wrong ('+r.status+')');
+  show(d,await jp,{from,start,end,body},await fp);
+ }catch(e){
+  const msg=e instanceof TypeError?'We could not reach the planner. Make sure the gateway (port 8080) and smart-planner-service (port 8090) are running.':e.message;
+  $('#out').innerHTML=`<div class="err"><b>Sorry, the plan could not be made.</b><br>${esc(msg)}</div><button class="btn" onclick="again()">Try again</button>`}
+};
+function again(){me=null;$('#out').innerHTML='';step(2)}
+
+const crowdW={Low:['Quiet','good'],Moderate:['Moderately busy','mid'],High:['Very busy','bad']};
+const trafW={Light:['Smooth roads','good'],Moderate:['Some traffic','mid'],Heavy:['Heavy traffic','bad'],Unknown:['Traffic not checked','']};
+function weatherPill(w){if(!w)return '<span class="pill">Weather not available</span>';
+ const t=w.rainy?['Rain likely','bad']:w.hot?['Very hot','mid']:['Fair weather','good'];
+ return `<span class="pill ${t[1]}">${t[0]}</span><span class="pill">${w.highC}°C</span>${w.rainChance!=null?`<span class="pill">${w.rainChance}% chance of rain</span>`:''}`}
+
+function show(p,j,q,food){
+ window.last={p,q,j,food};const h=p.hotel,nDays=p.days.length;
+ let html=`<div class="banner"><h2>Your trip to ${esc(p.destination)}</h2><p>${esc(q.start)} to ${esc(q.end)} · ${nDays} day${nDays>1?'s':''}</p></div>`;
+
+ if(window.note){html+=`<div class="card" style="background:var(--y);color:var(--yi)"><b>${esc(window.note.summary)}</b>${window.note.changes.length?`<ul class="list">${window.note.changes.map(c=>`<li>${esc(c)}</li>`).join('')}</ul>`:''}</div>`}
+ if(j){html+=`<div class="card"><h2>1. Getting there</h2><p class="help">From ${esc(j.from)} to ${esc(j.to)}</p>
+  <div class="facts"><span class="pill">${j.km} km</span><span class="pill">By car: about ${Math.floor(j.driveMinutes/60)} h ${j.driveMinutes%60} min</span><span class="pill">By bus: ${esc(j.busEstimate)}</span></div>
+  <p><a class="btn" href="${esc(j.redbusUrl)}" target="_blank" rel="noopener">Find buses on redBus</a></p>
+  ${j.breaks.length?`<h3>Where to take a break</h3><ul class="list">${j.breaks.map(b=>`<li><b>${esc(b.name)}</b> <span class="mute">(about ${b.afterMinutes/60} hours into the trip)</span></li>`).join('')}</ul>`:''}
+  <p class="mute">${j.tips.map(esc).join(' ')}</p></div>`}
+
+ html+=`<div class="card"><h2>${j?'2':'1'}. Where you will stay</h2>`;
+ if(h){html+=`<h3>${esc(h.name)}</h3>
+  <div class="facts"><span class="pill good">Match score: ${h.fitScore} out of 100</span><span class="pill">About ${money(h.estimatedPricePerNight)} per night</span>${h.stars?`<span class="pill">${h.stars} star</span>`:''}<span class="pill">${h.distanceToAttractionsKm} km from the sights</span></div>
+  <ul class="list">${h.reasons.map(r=>`<li>${esc(r)}</li>`).join('')}</ul>`;
+  if(p.hotelOptions.length>1)html+=`<details><summary>See ${p.hotelOptions.length-1} other hotels</summary>${p.hotelOptions.slice(1).map(o=>`<div class="hotel"><b>${esc(o.name)}</b><br><span class="mute">About ${money(o.estimatedPricePerNight)} per night · ${o.distanceToAttractionsKm} km from the sights${o.confirmedAmenities.length?' · has '+esc(o.confirmedAmenities.join(', ')):''}</span></div>`).join('')}</details>`;
+  html+=`<details><summary>Why this score?</summary><ul class="list">${h.scoreBreakdown.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></details>
+  ${revBlock(h.name,'hotel',p.destination)}<p><button class="btn" id="bookBtn">Book this hotel</button></p><div id="bookBox"></div>
+  <p class="mute">Prices are estimates. Booking here is a demo: no payment is taken and the hotel is not contacted.</p>`}
+ else html+='<p>We could not find a hotel that matches. Try a higher budget.</p>';
+ html+='</div>';
+
+ html+=`<h2 style="margin:22px 0 10px">${j?'3':'2'}. Your plan, day by day</h2>`;
+ p.days.forEach(d=>{html+=`<div class="card day"><div class="dh"><h3>Day ${d.day} · ${esc(d.date)}</h3><div>${weatherPill(d.weather)}</div></div>
+  ${d.stops.map(s=>{const c=crowdW[s.crowd]||['',''],t=trafW[s.travel.traffic]||['',''];
+   return `<div class="stop"><div class="time">${esc(s.time)}</div><div><b>${esc(s.name)}</b>
+   <div><span class="pill">${s.kind==='indoor'?'Indoors':'Outdoors'}</span><span class="pill ${c[1]}">${c[0]}</span><span class="pill ${t[1]}">${s.travel.minutes} min drive · ${t[0]}</span></div>
+   <div class="why">${esc(s.why.split(';')[0])}.</div></div></div>`}).join('')}
+  ${d.tips.length?`<div class="stop"><div></div><div class="mute">${d.tips.map(esc).join(' ')}</div></div>`:''}</div>`});
+
+ html+=`<div class="card"><h3>Something changed?</h3><p class="help">Tell us what is wrong and we will change your plan.</p>
+  <div class="pick"><button class="btn alt" data-replan="weather">It is raining or too hot</button><button class="btn alt" data-replan="traffic">Traffic is bad</button><button class="btn alt" data-replan="crowd">Places are too crowded</button></div><p id="replanMsg" class="mute"></p></div>`;
+ if(food&&food.restaurants.length){html+=`<div class="card"><h2>Where to eat</h2><p class="help">Lunch and dinner ideas for each day, based on your food choices.</p>
+  ${food.meals.map(m=>`<div class="hotel"><b>Day ${m.day}</b> <span class="mute">· ${esc(m.date)}</span><br>Lunch: ${esc(m.lunch)}<br>Dinner: ${esc(m.dinner)}</div>`).join('')}
+  <details><summary>See the top restaurants for you</summary>${food.restaurants.slice(0,6).map(r=>placeCard(r,p.destination)).join('')}</details>
+  ${food.notes.length?`<p class="mute">${food.notes.map(esc).join(' ')}</p>`:''}</div>`}
+ html+=`<div class="card"><h2>Meet other solo travellers</h2><div id="connectBox"></div></div>`;
+ html+=`<div class="card"><h3>How to read this</h3><ul class="list mute">
+  <li><b>Quiet / busy</b> is an estimate based on the time of day, the weekday and how popular a place is. It is not live data.</li>
+  <li><b>Drive time and traffic</b> come from TomTom for the road between two stops.</li>
+  <li><b>Weather</b> uses the forecast when your dates are within 16 days, otherwise last year's weather.</li>
+  <li>We pick indoor places when it rains or is very hot, and outdoor places in the cooler morning and evening.</li></ul>
+  ${p.notes.length?`<h3 style="margin-top:14px">Good to know</h3><ul class="list mute">${p.notes.map(n=>`<li>${esc(n)}</li>`).join('')}</ul>`:''}</div>
+  <button class="btn" onclick="again()">Change my answers</button>`;
+ $('#out').innerHTML=html;window.note=null;window.scrollTo(0,0);connectUI();layout();
+}
+document.addEventListener('click',async e=>{
+ if(e.target.id==='bookBtn'){
+  $('#bookBox').innerHTML=`<div class="card" style="background:var(--soft)"><h3>Who is booking?</h3><label>Your name<input type="text" id="gName"></label><label>Phone number<input type="text" id="gPhone"></label><label>Number of rooms<input type="number" id="gRooms" min="1" max="5" value="1"></label><p><button class="btn" id="confirmBook">Confirm booking</button></p></div>`}
+ if(e.target.id==='confirmBook'){
+  const {p,q}=window.last,name=$('#gName').value.trim();
+  if(!name){alert('Please enter your name.');return}
+  e.target.disabled=true;
+  try{
+   const next=new Date(q.start);next.setDate(next.getDate()+1);
+   const out=q.end>q.start?q.end:iso(next);
+   const r=await fetch(BASE+'/api/smart-plan/bookings',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({hotelName:p.hotel.name,guestName:name,phone:$('#gPhone').value,checkIn:q.start,checkOut:out,rooms:+$('#gRooms').value||1,pricePerNight:p.hotel.estimatedPricePerNight})});
+   const b=await r.json().catch(()=>null);
+   if(!r.ok)throw new Error(b?Object.values(b).join(', '):'Booking failed');
+   $('#bookBox').innerHTML=`<div class="card" style="background:var(--g);color:var(--gi)"><h3>Booking confirmed (demo)</h3><p>Reference: <b>${esc(b.reference)}</b><br>${esc(b.hotelName)} · ${b.nights} night${b.nights>1?'s':''} · ${b.rooms} room${b.rooms>1?'s':''}<br>Estimated total: <b>${money(b.estimatedTotal)}</b></p><p>${esc(b.note)}</p></div>`;
+  }catch(err){alert(err.message);e.target.disabled=false}
+ }});
+function revBlock(name,type,dest){
+ return `<div class="rvbox" data-type="${type}" data-name="${esc(name)}" data-dest="${esc(dest)}"><div class="rv"><select aria-label="Your rating">${[5,4,3,2,1].map(n=>`<option value="${n}">${n} star${n>1?'s':''}</option>`).join('')}</select><input type="text" placeholder="Write a short review (optional)" aria-label="Your review"><button class="btn sm2" data-act="review">Submit review</button><button class="btn alt sm2" data-act="see">See reviews</button></div><div class="rvout"></div></div>`}
+function placeCard(r,dest){
+ return `<div class="hotel"><b>${esc(r.name)}</b> <span class="pill good">Score ${r.fitScore} out of 100</span><br><span class="mute">${esc(r.cuisine)} · about ${money(r.estimatedPrice)} per meal · ${r.distanceKm} km from the center</span>
+ <ul class="list">${r.reasons.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>${revBlock(r.name,'restaurant',dest)}</div>`}
+document.addEventListener('click',async e=>{
+ const b=e.target.closest('[data-act]');if(!b)return;
+ const box=b.closest('.rvbox'),out=box.querySelector('.rvout'),d=box.dataset;
+ try{
+  if(b.dataset.act==='review'){
+   const inp=box.querySelector('input');
+   const r=await fetch(BASE+'/api/smart-plan/reviews',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({placeType:d.type,placeName:d.name,destination:d.dest,rating:+box.querySelector('select').value,comment:inp.value,author:'Traveler'})});
+   const x=await r.json().catch(()=>null);if(!r.ok)throw new Error(x?Object.values(x).join(', '):'Could not save your review');
+   inp.value='';out.innerHTML='<span class="pill good">Thanks, your review was saved.</span>';
+  }else{
+   const r=await fetch(BASE+'/api/smart-plan/reviews?placeName='+encodeURIComponent(d.name)+'&destination='+encodeURIComponent(d.dest));
+   const x=await r.json();
+   out.innerHTML=x.count?`<p><b>${x.average} out of 5</b> from ${x.count} review${x.count>1?'s':''}</p>`+x.reviews.map(v=>`<p class="mute">${'★'.repeat(v.rating)} ${esc(v.comment||'(no comment)')} <i>by ${esc(v.author)}</i></p>`).join(''):'<p class="mute">No reviews yet. Be the first to review.</p>';
+  }
+ }catch(err){alert(err.message)}});
+let me=null;
+async function api2(path,opt){const r=await fetch(BASE+path,{headers:{'Content-Type':'application/json'},...opt});const x=await r.json().catch(()=>null);if(!r.ok)throw new Error(x?Object.values(x).join(', '):'Request failed');return x}
+async function connectUI(){const box=$('#connectBox');if(!box)return;
+ if(!me){box.innerHTML=`<p class="mute">Travelling alone? Meet other solo travellers going to the same place on the same dates. You only appear if you join, and only your display name and interests are shown. You can leave at any time.</p>
+  <label>Display name<input type="text" id="cName" maxlength="30" placeholder="For example: Ravi"></label>
+  <label>Your interests <small>(separate with commas)</small><input type="text" id="cInt" placeholder="food, beaches, photography"></label>
+  <p><button class="btn" id="cJoin">Join</button></p>`;return}
+ try{const [m,rq]=await Promise.all([api2(`/api/smart-plan/connect/${me.id}/matches`),api2(`/api/smart-plan/connect/${me.id}/requests`)]);
+  box.innerHTML=`<p>You are in as <b>${esc(me.displayName)}</b>. <button class="btn alt sm2" id="cRefresh">Refresh</button> <button class="btn alt sm2" id="cLeave">Leave</button></p>
+  <h3>Travellers like you</h3>${m.length?m.map(x=>`<div class="hotel"><b>${esc(x.displayName)}</b> <span class="pill good">${x.compatibility}% match</span><br><span class="mute">Same dates: ${esc(x.overlapStart)} to ${esc(x.overlapEnd)} · shared interests: ${x.sharedInterests.length?esc(x.sharedInterests.join(', ')):'none yet'}</span><br><button class="btn sm2" data-hi="${esc(x.id)}">Say hello</button></div>`).join(''):'<p class="mute">No one else has joined for these dates yet. Check again later.</p>'}
+  <h3>Messages</h3>${rq.length?rq.map(q=>{const mine=q.fromId===me.id;return `<div class="hotel">${mine?`You to <b>${esc(q.toName)}</b>`:`<b>${esc(q.fromName)}</b> to you`}: ${esc(q.message||'(no message)')} <span class="pill ${q.status==='ACCEPTED'?'good':q.status==='DECLINED'?'bad':'mid'}">${q.status.toLowerCase()}</span>${!mine&&q.status==='PENDING'?`<br><button class="btn sm2" data-ans="accept" data-rid="${esc(q.id)}">Accept</button> <button class="btn alt sm2" data-ans="decline" data-rid="${esc(q.id)}">Decline</button>`:''}</div>`}).join(''):'<p class="mute">No messages yet.</p>'}`;
+ }catch(err){me=null;connectUI();alert(err.message)}}
+document.addEventListener('click',async e=>{const b=e.target;
+ try{
+  if(b.id==='cJoin'){const name=$('#cName').value.trim();if(!name){alert('Please enter a display name.');return}
+   const bd=window.last.q.body;
+   me=await api2('/api/smart-plan/connect',{method:'POST',body:JSON.stringify({displayName:name,destination:bd.destination,startDate:bd.startDate,endDate:bd.endDate,interests:$('#cInt').value.split(',').map(x=>x.trim()).filter(Boolean),pace:bd.pace})});connectUI()}
+  else if(b.id==='cRefresh')connectUI();
+  else if(b.id==='cLeave'){await api2('/api/smart-plan/connect/'+me.id,{method:'DELETE'});me=null;connectUI()}
+  else if(b.dataset.hi){const msg=prompt('Write a short hello (please do not share phone numbers yet):','Hi! Want to explore together?');if(msg===null)return;
+   await api2(`/api/smart-plan/connect/${me.id}/requests`,{method:'POST',body:JSON.stringify({toId:b.dataset.hi,message:msg})});connectUI()}
+  else if(b.dataset.ans){await api2(`/api/smart-plan/connect/requests/${b.dataset.rid}/respond`,{method:'POST',body:JSON.stringify({responderId:me.id,decision:b.dataset.ans})});connectUI()}
+ }catch(err){alert(err.message)}});
+document.addEventListener('click',async e=>{const b=e.target.closest('[data-replan]');if(!b)return;
+ const {q,j,food}=window.last;$('#replanMsg').textContent='Rechecking your plan. This takes a few seconds...';
+ try{const r=await fetch(BASE+'/api/smart-plan/replan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({reason:b.dataset.replan,plan:q.body})});
+  const x=await r.json().catch(()=>null);if(!r.ok)throw new Error(x?Object.values(x).join(', '):'Replan failed');
+  window.note=x;window.curTab='plan';show(x.plan,j,q,food)}catch(err){$('#replanMsg').textContent='';alert(err.message)}});
+const TABS=[['trip','🏨 Trip & stay'],['plan','🗓️ Day by day'],['food','🍽️ Food'],['people','👥 People'],['info','ℹ️ Info']];
+function tabOf(el){
+ if(el.classList.contains('day'))return 'plan';
+ if(el.style&&el.style.background)return 'plan';
+ const t=(el.querySelector('h2,h3')||el).textContent;
+ if(/Getting there|Where you will stay/.test(t))return 'trip';
+ if(/day by day|Something changed/.test(t))return 'plan';
+ if(/Where to eat/.test(t))return 'food';
+ if(/solo/i.test(t))return 'people';
+ if(/How to read/.test(t))return 'info';
+ return null}
+function layout(){
+ const out=$('#out'),banner=out.querySelector('.banner');if(!banner||!window.last)return;
+ const p=window.last.p,h=p.hotel;
+ banner.insertAdjacentHTML('beforeend',`<div>${[`📍 ${esc(p.destination)}`,`🗓️ ${p.days.length} day${p.days.length>1?'s':''}`,h?`🏨 ${esc(h.name)}`:'',h?`⭐ Match ${h.fitScore}/100`:''].filter(Boolean).map(x=>`<span class="bchip">${x}</span>`).join('')}</div>`);
+ const tagged=[...out.children].filter(el=>el!==banner).map(el=>[el,tabOf(el)]).filter(x=>x[1]);
+ tagged.forEach(([el,t])=>el.dataset.tab=t);
+ const used=new Set(tagged.map(x=>x[1])),bar=document.createElement('div');bar.className='tabbar';
+ bar.innerHTML=TABS.filter(t=>used.has(t[0])).map(t=>`<button data-t="${t[0]}">${t[1]}</button>`).join('');
+ banner.after(bar);
+ const first=out.querySelector('.day');
+ if(first){const n=out.querySelectorAll('.day').length,ch=document.createElement('div');ch.className='dchips';ch.dataset.tab='plan';
+  ch.innerHTML='<button data-d="all" class="on">All days</button>'+Array.from({length:n},(_,i)=>`<button data-d="${i}">Day ${i+1}</button>`).join('');first.before(ch)}
+ setTab(used.has(window.curTab)?window.curTab:'trip')}
+function setTab(t){window.curTab=t;
+ document.querySelectorAll('#out [data-tab]').forEach(el=>{const on=el.dataset.tab===t;el.style.display=on?'':'none';if(on)el.classList.add('fade')});
+ document.querySelectorAll('.tabbar button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));
+ document.querySelectorAll('.dchips button').forEach(b=>b.classList.toggle('on',b.dataset.d==='all'))}
+document.addEventListener('click',e=>{
+ const t=e.target.closest('.tabbar button');if(t){setTab(t.dataset.t);window.scrollTo(0,0);return}
+ const c=e.target.closest('.dchips button');if(c){const d=c.dataset.d;
+  document.querySelectorAll('.dchips button').forEach(b=>b.classList.toggle('on',b===c));
+  document.querySelectorAll('#out .day').forEach((el,i)=>el.style.display=(d==='all'||+d===i)?'':'none')}});
+</script></body></html>

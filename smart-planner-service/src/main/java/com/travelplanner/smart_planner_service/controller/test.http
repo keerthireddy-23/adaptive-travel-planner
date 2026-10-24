@@ -1,0 +1,66 @@
+### Food plan
+POST http://localhost:8090/api/smart-plan/food
+Content-Type: application/json
+
+{
+  "destination": "Goa",
+  "startDate": "2026-10-12",
+  "endDate": "2026-10-14",
+  "diet": "veg",
+  "cuisines": ["indian", "cafe"],
+  "maxPerMeal": 700
+}
+### Replan because of crowds
+POST http://localhost:8090/api/smart-plan/replan
+Content-Type: application/json
+
+{
+  "reason": "crowd",
+  "plan": {
+    "destination": "Goa",
+    "startDate": "2026-10-12",
+    "endDate": "2026-10-14",
+    "maxHotelPerNight": 5000,
+    "amenities": ["wifi"],
+    "nearAttractions": true,
+    "pace": "explore",
+    "interests": ["culture"]
+  }
+}
+### Traveler 1
+POST http://localhost:8090/api/smart-plan/connect
+Content-Type: application/json
+
+{ "displayName": "Ravi", "destination": "Goa", "startDate": "2026-10-12", "endDate": "2026-10-16",
+  "interests": ["beaches", "food", "photography"], "pace": "explore" }
+### Traveler 2
+POST http://localhost:8090/api/smart-plan/connect
+Content-Type: application/json
+
+{ "displayName": "Anita", "destination": "Goa", "startDate": "2026-10-14", "endDate": "2026-10-18",
+  "interests": ["food", "trekking"], "pace": "explore" }
+
+### Ravi sends a request to Anita
+# Ravi's id = dfcc3df8, Anita's id = 4fc46260
+POST http://localhost:8090/api/smart-plan/connect/dfcc3df8/requests
+Content-Type: application/json
+
+{
+  "toId": "4fc46260",
+  "message": "Hi, want to explore the old town together on the 15th?"
+}
+
+### Anita's requests (copy the request id from the response)
+GET http://localhost:8090/api/smart-plan/connect/8f1bbda3/requests
+
+### Anita accepts (paste the request id in the URL)
+POST http://localhost:8090/api/smart-plan/connect/requests/7b7968f2/respond
+Content-Type: application/json
+
+{
+  "responderId": "520f8e71",
+  "decision": "accept"
+}
+
+### Ravi's matches
+GET http://localhost:8090/api/smart-plan/connect/c7f0ff6b/matches
